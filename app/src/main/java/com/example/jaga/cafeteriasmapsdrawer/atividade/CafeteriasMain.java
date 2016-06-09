@@ -1,5 +1,6 @@
 package com.example.jaga.cafeteriasmapsdrawer.atividade;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.jaga.cafeteriasmapsdrawer.R;
+import com.example.jaga.cafeteriasmapsdrawer.beans.CafeteriaBean;
 
 public class CafeteriasMain extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -83,9 +85,11 @@ public class CafeteriasMain extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_maps) {
-            // Handle the camera action
+            Intent intent = new Intent(CafeteriasMain.this, CoffeeShopMapsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_coffee_shop) {
-
+            Intent intent = new Intent(CafeteriasMain.this, CoffeeShopList.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

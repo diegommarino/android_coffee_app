@@ -1,58 +1,99 @@
 package com.example.jaga.cafeteriasmapsdrawer.atividade;
 
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.example.jaga.cafeteriasmapsdrawer.R;
-import com.example.jaga.cafeteriasmapsdrawer.fragmento.FragmentBebidasQuente;
-import com.example.jaga.cafeteriasmapsdrawer.fragmento.FragmentBedidasFria;
-import com.example.jaga.cafeteriasmapsdrawer.fragmento.FragmentOutros;
+import com.example.jaga.cafeteriasmapsdrawer.fragments.FragmentBebidasFria;
+import com.example.jaga.cafeteriasmapsdrawer.fragments.FragmentBebidasQuente;
+import com.example.jaga.cafeteriasmapsdrawer.fragments.FragmentOutros;
 
-/**
- * Created by jaga on 12/05/16.
- */
-public class ListaBebidasAtividade extends FragmentActivity {
+import java.util.ArrayList;
+import java.util.List;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.layout_lista_bebidas);
+public class ListaBebidasAtividade extends AppCompatActivity {
 
-		ActionBar actionBar = getActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.background_drawable));
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+    private Toolbar toolbar;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
 
-		Tab tabA = actionBar.newTab();
-		tabA.setIcon(R.drawable.ic_cold_drink);
-		tabA.setTabListener(new TabNavegacao(this, new FragmentBedidasFria()));
-		actionBar.addTab(tabA, false);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.layout_lista_bebidas);
 
-		Tab tabB = actionBar.newTab();
-		tabB.setIcon(R.drawable.ic_hot_drink);
-		tabB.setTabListener(new TabNavegacao(this, new FragmentBebidasQuente()));
-		actionBar.addTab(tabB, false);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-		Tab tabC = actionBar.newTab();
-		tabC.setIcon(R.drawable.ic_food);
-		tabC.setTabListener(new TabNavegacao(this, new FragmentOutros()));
-		actionBar.addTab(tabC, false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		if(savedInstanceState != null){
-			int indiceTab = savedInstanceState.getInt("indiceTab");
-			getActionBar().setSelectedNavigationItem(indiceTab);
-		}
-		else{
-			getActionBar().setSelectedNavigationItem(0);
-		}
-	}
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        setupViewPager(viewPager);
 
-	@Override
-	public void onSaveInstanceState(Bundle outState){
-		super.onSaveInstanceState(outState);
-		outState.putInt("indiceTab", getActionBar().getSelectedNavigationIndex());
-	}
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
+        setupTabIcons();
+    }
+
+    private void setupTabIcons() {
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_hot_drink);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_cold_drink);
+        tabLayout.getTabAt(2).setIcon(R.drawable.ic_food);
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        Bundle extras = getIntent().getExtras();
+
+        Fragment bebidasQuentes = new FragmentBebidasQuente();
+        bebidasQuentes.setArguments(extras);
+        adapter.addFragment(bebidasQuentes, "Bebidas Quentes");
+
+        Fragment bebidasFrias = new FragmentBebidasFria();
+        bebidasFrias.setArguments(extras);
+        adapter.addFragment(bebidasFrias, "Bebidas Geladas");
+
+        Fragment outros = new FragmentOutros();
+        outros.setArguments(extras);
+        adapter.addFragment(outros, "Outros");
+
+        viewPager.setAdapter(adapter);
+    }
+
+    class ViewPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager manager) {
+            super(manager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            // return null to display only the icon
+            return null;
+        }
+    }
 }

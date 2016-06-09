@@ -1,0 +1,21 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=E9:C0:4A:D0:1C:5A:6A:09:E2:09:90:08:22:A9:62:26:35:EA:07:CF%3Bcom.example.jaga.cafeteriasmapsdrawer
+
+    You can also add your credentials to an existing key, using this line:
+    E9:C0:4A:D0:1C:5A:6A:09:E2:09:90:08:22:A9:62:26:35:EA:07:CF;com.example.jaga.cafeteriasmapsdrawer
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyA7NsYQj8JHqXpDbVsRkyr4eEYFHo6YqMY
+    </string>
+</resources>
