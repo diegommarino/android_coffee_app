@@ -1,8 +1,11 @@
 package com.example.jaga.cafeteriasmapsdrawer.atividade;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -56,6 +59,44 @@ public class CoffeeShopList extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.context_menu_coffee_shop, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Object o = listViewCafeterias.getItemAtPosition(info.position);
+        int teste = item.getGroupId();
+        cafeteria = (CafeteriaBean) o;
+
+        switch (item.getItemId()) {
+            case R.id.show_in_map:
+                showInMap(cafeteria.getNome());
+                break;
+            case R.id.make_call:
+                makeCall(cafeteria.getTelefone());
+                break;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+    private void showInMap(String nomeCafeteria){
+        Intent intent = new Intent(CoffeeShopList.this, CoffeeShopMapsActivity.class);
+        intent.putExtra("coffeeShopName", nomeCafeteria);
+        startActivity(intent);
+    }
+
+    private void makeCall(String telefone){
+        String editedPhone = telefone.replaceAll("[^\\d]", "");
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:"+editedPhone));
+        startActivity(intent);
     }
 
 }

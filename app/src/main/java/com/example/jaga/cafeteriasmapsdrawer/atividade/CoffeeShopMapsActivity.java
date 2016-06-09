@@ -1,13 +1,13 @@
 package com.example.jaga.cafeteriasmapsdrawer.atividade;
 
+import android.content.Context;
 import android.graphics.Color;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jaga.cafeteriasmapsdrawer.R;
@@ -29,7 +29,7 @@ public class CoffeeShopMapsActivity extends FragmentActivity implements OnMapRea
 
     public static final String LOG_S = "SCRIPT";
     private GoogleMap mMap;
-    private Marker mMarker;
+    private ArrayList<CafeteriaBean> listaCafeterias = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +57,15 @@ public class CoffeeShopMapsActivity extends FragmentActivity implements OnMapRea
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         DataAccessObject dao = new DataAccessObject(getApplicationContext());
-        //dao.seedTableCafeteria(dao.getWritableDatabase());
-        ArrayList<CafeteriaBean> listaCafeterias = dao.selectCafeterias();
+        Bundle extras = getIntent().getExtras();
 
-        if (listaCafeterias.isEmpty()) {
-            dao.seedTableCafeteria();
+        if(extras == null)
             listaCafeterias = dao.selectCafeterias();
+        else {
+            CafeteriaBean caf = dao.cafeteriaByName(extras.getString("coffeeShopName"));
+            listaCafeterias.add(caf);
         }
+
 
         for (CafeteriaBean cafeteria : listaCafeterias) {
             LatLng localCafeteria = new LatLng(cafeteria.getLatitude(), cafeteria.getLongitude());
@@ -71,6 +73,10 @@ public class CoffeeShopMapsActivity extends FragmentActivity implements OnMapRea
         }
 
         configureCameraPosition();
+        configureInfoWindow();
+        //configureListeners();
+
+        //configureInfoWindow();
         //LatLng fortaleza = new LatLng(-3.7903373, -38.6585574);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(fortaleza));
     }
@@ -110,52 +116,52 @@ public class CoffeeShopMapsActivity extends FragmentActivity implements OnMapRea
                 Log.i(LOG_S, "Acionado o metodo: onCancel");
             }
         });
+    }
 
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter(){
+    public void configureInfoWindow(){
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             // Altera somente o conteudo do InfoWindow
             @Override
             public View getInfoContents(Marker marker) {
-                // TODO Auto-generated method stub
-                String markerTextColor = "#ff0000";
-
+                String markerTextColor = "#444444";
                 TextView textView = new TextView(CoffeeShopMapsActivity.this);
                 textView.setText(Html.fromHtml("<b><font color= "
-                        + markerTextColor + marker.getTitle() + "</font></b>"
+                        + markerTextColor + ">" + marker.getTitle() + ": </font></b>"
                         + marker.getSnippet()));
 
                 return textView;
             }
-
 
             // Altera os parametros do InfoWindow. Normalmente é utilizado para customizar os markers.
             // Esse método tem "preferencia" em relação ao anterior quanto a sua execução. Portanto
             // caso continue nulo, irá "passar" sobre código programado no método getInfoContents()
             @Override
             public View getInfoWindow(Marker marker) {
-                // TODO Auto-generated method stub
-                LinearLayout linearLayout = new LinearLayout(CoffeeShopMapsActivity.this);
-                // Trabalha com a quantidade de pixels considerados na renderização
-                linearLayout.setPadding(30, 30, 20, 20);
-                linearLayout.setBackgroundColor(Color.LTGRAY);
+                View v; // Creating an instance for View Object
+                LayoutInflater inflater = (LayoutInflater)getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.coffee_shops_maps, null);
+                v.setBackgroundColor(Color.WHITE);
 
-                String markerTextColor = "#f5f5f5";
-                TextView textView = new TextView(CoffeeShopMapsActivity.this);
-                textView.setText(Html.fromHtml("<b><font color= "
-                        + markerTextColor + marker.getTitle() + "</font></b>"
-                        + marker.getSnippet()));
-                linearLayout.addView(textView);
+                DataAccessObject dao = new DataAccessObject(CoffeeShopMapsActivity.this);
 
-                Button button = new Button(CoffeeShopMapsActivity.this);
-                button.setText("Botão do InfoWindow");
-//              linearLayout.setBackgroundColor(Color.RED);
-                linearLayout.addView(button);
+                TextView nome = (TextView) v.findViewById(R.id.textViewNome);
+                TextView descricao = (TextView) v.findViewById(R.id.textViewDescricao);
+                TextView endereco = (TextView) v.findViewById(R.id.textViewEndereco);
+                TextView telefone = (TextView) v.findViewById(R.id.textViewTelefone);
 
-                return null;
+                CafeteriaBean cafeteria = dao.cafeteriaByName(marker.getTitle());
+
+                String markerTextColor = "#473100";
+                nome.setText(Html.fromHtml("<b><font color= "
+                        + markerTextColor + ">" + cafeteria.getNome() + "</font></b>"));
+                descricao.setText(cafeteria.getDescricao());
+                endereco.setText(cafeteria.getEndereco());
+                telefone.setText(cafeteria.getTelefone());
+                return v;
             }
 
         });
-
     }
 
     public void createCustomMapMarkers(LatLng latlng, String title, String snippet){

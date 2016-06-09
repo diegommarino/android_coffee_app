@@ -298,6 +298,28 @@ public class DataAccessObject extends SQLiteOpenHelper {
         return categoria;
     }
 
+    public CafeteriaBean cafeteriaByName(String name){
+        checkTableCafeteria();
+
+        CafeteriaBean cafeteria = new CafeteriaBean();
+        Cursor cursor = getReadableDatabase().query(
+                TABLE_CAFETERIA,
+                null,
+                "nome = ?",
+                new String[]{name}, null, null, "1");
+        //Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_CAFETERIA + " WHERE nome = '"+ name +"'  LIMIT 1;", null);
+        cursor.moveToNext();
+
+        cafeteria.setId(cursor.getInt(0));
+        cafeteria.setNome(cursor.getString(1));
+        cafeteria.setDescricao(cursor.getString(2));
+        cafeteria.setEndereco(cursor.getString(3));
+        cafeteria.setTelefone(cursor.getString(4));
+        cafeteria.setLatitude(cursor.getDouble(5));
+        cafeteria.setLongitude(cursor.getDouble(6));
+        return cafeteria;
+    }
+
     public ArrayList<ProdutoBean> productListByCategoryId(Integer categoryId){
         checkTableCategoria();
         checkTableProdutos();
