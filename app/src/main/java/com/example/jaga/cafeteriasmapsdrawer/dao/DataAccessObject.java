@@ -3,6 +3,7 @@ package com.example.jaga.cafeteriasmapsdrawer.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -41,7 +42,8 @@ public class DataAccessObject extends SQLiteOpenHelper {
                 + "nome TEXT, "
                 + "descricao TEXT,"
                 + "preco DECIMAL,"
-                + "categoria_id);";
+                + "categoria_id,"
+                + "cafeteria_id);";
         db.execSQL(sql);
 
         sql = "CREATE TABLE " + TABLE_CAFETERIA
@@ -49,6 +51,7 @@ public class DataAccessObject extends SQLiteOpenHelper {
                 + "nome TEXT, "
                 + "descricao TEXT,"
                 + "endereco TEXT,"
+                + "telefone TEXT,"
                 + "latitude DECIMAL,"
                 + "longitude DECIMAL);";
         db.execSQL(sql);
@@ -59,12 +62,16 @@ public class DataAccessObject extends SQLiteOpenHelper {
                 + "cafeteria_id INTEGER);";
         db.execSQL(sql);
 
-        seedTableCategoria(db);
-        seedTableProduto(db);
-        seedTableCafeteria(db);
+        seedTableCategoria();
+        seedTableProduto();
+        seedTableCafeteria();
     }
 
-    public void seedTableProduto(SQLiteDatabase db) {
+    public void seedTableProduto() {
+        SQLiteDatabase db = getWritableDatabase();
+        String sql = "DELETE FROM " + TABLE_CATEGORIA;
+        db.execSQL(sql);
+
         ContentValues contentValues = new ContentValues();
 
         // Bebidas Quentes
@@ -72,18 +79,21 @@ public class DataAccessObject extends SQLiteOpenHelper {
         contentValues.put("descricao", "Cafézinho filtrado na meia.");
         contentValues.put("preco", "2.99");
         contentValues.put("categoria_id", "1");
+        contentValues.put("cafeteria_id", "1");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Café Expresso");
         contentValues.put("descricao", "Café mais encorpado, com sabor mais acentuado.");
         contentValues.put("preco", "3.99");
         contentValues.put("categoria_id", "1");
+        contentValues.put("cafeteria_id", "2");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Café Submarino");
         contentValues.put("descricao", "Café mais com bordas de chocolate e um chocolate alpino dentro.");
         contentValues.put("preco", "3.99");
         contentValues.put("categoria_id", "1");
+        contentValues.put("cafeteria_id", "3");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         // Bebidas Geladas
@@ -91,18 +101,21 @@ public class DataAccessObject extends SQLiteOpenHelper {
         contentValues.put("descricao", "Suco fresquinho da fruta.");
         contentValues.put("preco", "3.00");
         contentValues.put("categoria_id", "2");
+        contentValues.put("cafeteria_id", "1");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Chá Mate Gelado com Limão");
         contentValues.put("descricao", "O próprio nome já define o frescor.");
         contentValues.put("preco", "5.00");
         contentValues.put("categoria_id", "2");
+        contentValues.put("cafeteria_id", "2");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Frapuccino");
         contentValues.put("descricao", "Delicioso frapê de capuccino com sorvete de creme e chantily.");
         contentValues.put("preco", "5.00");
         contentValues.put("categoria_id", "2");
+        contentValues.put("cafeteria_id", "3");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         // Outros
@@ -110,22 +123,29 @@ public class DataAccessObject extends SQLiteOpenHelper {
         contentValues.put("descricao", "Empada com massa sequinha e um suculento recheio de frango.");
         contentValues.put("preco", "5.00");
         contentValues.put("categoria_id", "3");
+        contentValues.put("cafeteria_id", "1");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Croissant");
         contentValues.put("descricao", "Especialidade da casa.");
         contentValues.put("preco", "6.00");
         contentValues.put("categoria_id", "3");
+        contentValues.put("cafeteria_id", "2");
         db.insert(TABLE_PRODUTO, null, contentValues);
 
         contentValues.put("nome", "Waffles Canadense");
         contentValues.put("descricao", "Waffles cobertos com o delicioso maple syrup.");
         contentValues.put("preco", "6.00");
         contentValues.put("categoria_id", "3");
+        contentValues.put("cafeteria_id", "3");
         db.insert(TABLE_PRODUTO, null, contentValues);
     }
 
-    private void seedTableCategoria(SQLiteDatabase db) {
+    public void seedTableCategoria() {
+        SQLiteDatabase db = getWritableDatabase();
+        String sql = "DELETE FROM " + TABLE_CATEGORIA;
+        db.execSQL(sql);
+
         ContentValues contentValues = new ContentValues();
 
         contentValues.put("nome", "Bebidas Quentes");
@@ -141,7 +161,11 @@ public class DataAccessObject extends SQLiteOpenHelper {
         db.insert(TABLE_CATEGORIA, null, contentValues);
     }
 
-    private void seedTableCafeteria(SQLiteDatabase db) {
+    public void seedTableCafeteria() {
+        SQLiteDatabase db = getWritableDatabase();
+        String sql = "DELETE FROM " + TABLE_CAFETERIA;
+        db.execSQL(sql);
+
         ContentValues contentValues = new ContentValues();
 
         contentValues.put("nome", "Amika");
@@ -181,6 +205,10 @@ public class DataAccessObject extends SQLiteOpenHelper {
     }
 
     public ArrayList selectInstances(String tipo) {
+        checkTableCategoria();
+        checkTableCafeteria();
+        checkTableProdutos();
+
         String s = tipo.toLowerCase();
         if (s.equals("categoria")) {
             return selectCategorias();
@@ -194,7 +222,8 @@ public class DataAccessObject extends SQLiteOpenHelper {
         }
     }
 
-    private ArrayList<CategoriaBean> selectCategorias() {
+    public ArrayList<CategoriaBean> selectCategorias() {
+        checkTableCategoria();
         ArrayList<CategoriaBean> listaCategoria = new ArrayList<CategoriaBean>();
         String sql = "SELECT * FROM " + TABLE_CATEGORIA;
         Cursor cursor = getReadableDatabase().rawQuery(sql, null);
@@ -211,7 +240,8 @@ public class DataAccessObject extends SQLiteOpenHelper {
         return listaCategoria;
     }
 
-    private ArrayList<CafeteriaBean> selectCafeterias() {
+    public ArrayList<CafeteriaBean> selectCafeterias() {
+        checkTableCafeteria();
         ArrayList<CafeteriaBean> listaCafeteria= new ArrayList<CafeteriaBean>();
         String sql = "SELECT * FROM " + TABLE_CAFETERIA;
         Cursor cursor = getReadableDatabase().rawQuery(sql, null);
@@ -222,13 +252,18 @@ public class DataAccessObject extends SQLiteOpenHelper {
             cafeteriaBean.setId(cursor.getInt(0));
             cafeteriaBean.setNome(cursor.getString(1));
             cafeteriaBean.setDescricao(cursor.getString(2));
+            cafeteriaBean.setEndereco(cursor.getString(3));
+            cafeteriaBean.setTelefone(cursor.getString(4));
+            cafeteriaBean.setLatitude(cursor.getDouble(5));
+            cafeteriaBean.setLongitude(cursor.getDouble(6));
 
             listaCafeteria.add(cafeteriaBean);
         }
         return listaCafeteria;
     }
 
-    private ArrayList<ProdutoBean> selectProdutos() {
+    public ArrayList<ProdutoBean> selectProdutos() {
+        checkTableProdutos();
         ArrayList<ProdutoBean> listaProduto = new ArrayList<ProdutoBean>();
         String sql = "SELECT * FROM " + TABLE_PRODUTO;
         Cursor cursor = getReadableDatabase().rawQuery(sql, null);
@@ -246,6 +281,8 @@ public class DataAccessObject extends SQLiteOpenHelper {
     }
 
     public CategoriaBean selectCategoriaByName(String name) {
+        checkTableCategoria();
+        
         CategoriaBean categoria = new CategoriaBean();
         Cursor cursor = getReadableDatabase().query(
                 TABLE_CATEGORIA,
@@ -254,7 +291,7 @@ public class DataAccessObject extends SQLiteOpenHelper {
                 new String[]{name}, null, null, "1");
         //Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_CATEGORIA + " WHERE nome = '"+ name +"'  LIMIT 1;", null);
         cursor.moveToNext();
-        //Log.i("QUERY******* ", cursor.getString(1));
+        
         categoria.setId(cursor.getInt(0));
         categoria.setNome(cursor.getString(1));
         categoria.setDescricao(cursor.getString(2));
@@ -262,6 +299,8 @@ public class DataAccessObject extends SQLiteOpenHelper {
     }
 
     public ArrayList<ProdutoBean> productListByCategoryId(Integer categoryId){
+        checkTableCategoria();
+        checkTableProdutos();
         ArrayList<ProdutoBean> listaProduto = new ArrayList<ProdutoBean>();
         Cursor cursor = getReadableDatabase().query(
             TABLE_PRODUTO,
@@ -282,4 +321,44 @@ public class DataAccessObject extends SQLiteOpenHelper {
         }
         return listaProduto;
     }
+
+    public ArrayList<ProdutoBean> productListByCategoriaCafeteriaId(Integer categoryId, Integer cafeteriaId){
+        checkTableCafeteria();
+        checkTableProdutos();
+        ArrayList<ProdutoBean> listaProduto = new ArrayList<ProdutoBean>();
+        Cursor cursor = getReadableDatabase().query(
+                TABLE_PRODUTO,
+                null,
+                "categoria_id = ? AND cafeteria_id =?",
+                new String[]{categoryId.toString(), cafeteriaId.toString()}, null, null, null);
+
+        while (cursor.moveToNext()) {
+            ProdutoBean produtoBean = new ProdutoBean();
+
+            produtoBean.setId(cursor.getInt(0));
+            produtoBean.setNome(cursor.getString(1));
+            produtoBean.setDescricao(cursor.getString(2));
+            produtoBean.setPreco(cursor.getInt(3));
+
+            listaProduto.add(produtoBean);
+            //Log.i("Produto******* ", cursor.getString(1));
+        }
+        return listaProduto;
+    }
+    
+    private void checkTableCategoria(){
+        if (DatabaseUtils.queryNumEntries(getReadableDatabase(), TABLE_CATEGORIA) == 0)
+            seedTableCategoria();
+    }
+
+    private void checkTableCafeteria(){
+        if (DatabaseUtils.queryNumEntries(getReadableDatabase(), TABLE_CAFETERIA) == 0)
+            seedTableCafeteria();
+    }
+
+    private void checkTableProdutos(){
+        if (DatabaseUtils.queryNumEntries(getReadableDatabase(), TABLE_PRODUTO) == 0)
+            seedTableProduto();
+    }
+
 }
